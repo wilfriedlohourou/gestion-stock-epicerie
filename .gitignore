@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Base de données
+*.db
+
+# Editeur
+.vscode/
+.idea/
+
+# Système
+.DS_Store

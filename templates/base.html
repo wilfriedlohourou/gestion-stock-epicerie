@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestion Stock Épicerie{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand">Épicerie</div>
+        <nav class="navbar-links">
+            <a href="/">Accueil</a>
+            <a href="/produits-page">Produits</a>
+            <a href="/vente-page">Nouvelle vente</a>
+            <a href="/historique-page">Historique</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

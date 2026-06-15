@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<h1>Gestion de Stock - Épicerie</h1>
+<p>Bienvenue. Utilisez le menu pour gérer vos produits, enregistrer une vente ou consulter l'historique.</p>
+
+<div class="cards">
+    <a href="/produits-page" class="card">
+        <h2>Produits</h2>
+        <p>Gérer le catalogue et le stock</p>
+    </a>
+    <a href="/vente-page" class="card">
+        <h2>Nouvelle vente</h2>
+        <p>Enregistrer un achat et générer la facture</p>
+    </a>
+    <a href="/historique-page" class="card">
+        <h2>Historique</h2>
+        <p>Consulter les ventes précédentes</p>
+    </a>
+</div>
+{% endblock %}

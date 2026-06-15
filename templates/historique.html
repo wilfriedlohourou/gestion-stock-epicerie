@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Historique{% endblock %}
+
+{% block content %}
+<h1>Historique des ventes</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>N° Facture</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="tableau-historique">
+        <!-- Rempli dynamiquement -->
+    </tbody>
+</table>
+
+<script src="{{ url_for('static', filename='js/historique.js') }}"></script>
+{% endblock %}

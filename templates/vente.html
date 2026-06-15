@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Nouvelle vente{% endblock %}
+
+{% block content %}
+<h1>Nouvelle vente</h1>
+
+<div class="form-group">
+    <label for="select-produit">Ajouter un produit</label>
+    <select id="select-produit"></select>
+</div>
+
+<div class="form-group">
+    <label for="quantite-produit">Quantité</label>
+    <input type="number" id="quantite-produit" value="1" min="1">
+</div>
+
+<button onclick="ajouterAuPanier()">Ajouter au panier</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Sous-total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="tableau-panier">
+        <!-- Rempli dynamiquement -->
+    </tbody>
+</table>
+
+<div class="total-box">
+    <div>Total à payer</div>
+    <div class="montant" id="total-panier">0 FCFA</div>
+</div>
+
+<div style="margin-top:1.5rem;">
+    <button onclick="validerVente()">Valider la vente</button>
+    <button class="secondary" onclick="viderPanier()">Vider le panier</button>
+</div>
+
+<!-- Facture (cachée par défaut) -->
+<div id="facture" style="display:none; margin-top:2rem; border:1px solid var(--gray-border); border-radius:8px; padding:1.5rem;">
+    <h2>Facture #<span id="facture-id"></span></h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Sous-total</th>
+            </tr>
+        </thead>
+        <tbody id="facture-lignes"></tbody>
+    </table>
+    <div class="total-box">
+        <div>Total payé</div>
+        <div class="montant" id="facture-total">0 FCFA</div>
+    </div>
+    <div style="margin-top:1rem;">
+        <a id="lien-pdf" class="btn" href="#" target="_blank">Télécharger en PDF</a>
+        <button class="secondary" onclick="nouvelleVente()">Nouvelle vente</button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/vente.js') }}"></script>
+{% endblock %}

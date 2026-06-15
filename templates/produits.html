@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Produits{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1>Produits</h1>
+    <button onclick="ouvrirFormulaire()">+ Nouveau produit</button>
+</div>
+
+<!-- Formulaire (caché par défaut) -->
+<div id="form-produit" style="display:none; border:1px solid var(--gray-border); border-radius:8px; padding:1.5rem; margin-bottom:1.5rem;">
+    <h2 id="form-titre">Nouveau produit</h2>
+    <input type="hidden" id="produit-id">
+
+    <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" placeholder="Ex: Riz 25kg">
+    </div>
+
+    <div class="form-group">
+        <label for="categorie">Catégorie</label>
+        <input type="text" id="categorie" placeholder="Ex: Céréales">
+    </div>
+
+    <div class="form-group">
+        <label for="unite">Unité</label>
+        <select id="unite">
+            <option value="piece">Pièce</option>
+            <option value="sac">Sac</option>
+            <option value="kg">Kg</option>
+            <option value="litre">Litre</option>
+            <option value="carton">Carton</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="prix_unitaire">Prix unitaire (FCFA)</label>
+        <input type="number" id="prix_unitaire" placeholder="Ex: 15000">
+    </div>
+
+    <div class="form-group">
+        <label for="quantite_stock">Quantité en stock</label>
+        <input type="number" id="quantite_stock" placeholder="Ex: 10">
+    </div>
+
+    <div class="form-group">
+        <label for="seuil_alerte">Seuil d'alerte (stock bas)</label>
+        <input type="number" id="seuil_alerte" placeholder="Ex: 5">
+    </div>
+
+    <button onclick="enregistrerProduit()">Enregistrer</button>
+    <button class="secondary" onclick="fermerFormulaire()">Annuler</button>
+</div>
+
+<!-- Tableau des produits -->
+<table>
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Catégorie</th>
+            <th>Unité</th>
+            <th>Prix unitaire</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="tableau-produits">
+        <!-- Rempli dynamiquement en JS -->
+    </tbody>
+</table>
+
+<script src="{{ url_for('static', filename='js/produits.js') }}"></script>
+{% endblock %}
