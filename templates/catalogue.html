@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue - Épicerie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .catalogue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .produit-card {
+            border: 1px solid var(--gray-border);
+            border-radius: 8px;
+            padding: 1.2rem;
+        }
+
+        .produit-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .produit-card .prix {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .produit-card .stock-dispo {
+            font-size: 0.8rem;
+            color: var(--gray-text);
+            margin-bottom: 0.8rem;
+        }
+
+        .produit-card .qte-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .produit-card .qte-row input {
+            width: 70px;
+        }
+
+        /* Panier flottant */
+        .panier-flottant {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--black);
+            color: var(--white);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        /* Modal panier */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .modal-overlay.actif {
+            display: flex;
+        }
+
+        .modal-contenu {
+            background: var(--white);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px 12px 0 0;
+            padding: 2rem;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-contenu h2 {
+            margin-bottom: 1rem;
+        }
+
+        .confirmation {
+            display: none;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .confirmation h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="navbar-brand">Épicerie</div>
+    </header>
+
+    <main class="container">
+        <h1>Nos produits</h1>
+        <p>Sélectionnez vos produits et validez votre panier.</p>
+
+        <div class="catalogue-grid" id="catalogue-grid">
+            <!-- Produits chargés dynamiquement -->
+        </div>
+    </main>
+
+    <!-- Bouton panier flottant -->
+    <div class="panier-flottant" id="btn-panier" onclick="ouvrirPanier()">
+        🛒 Mon panier (<span id="nb-articles">0</span>)
+    </div>
+
+    <!-- Modal panier -->
+    <div class="modal-overlay" id="modal-panier">
+        <div class="modal-contenu">
+
+            <!-- Vue panier -->
+            <div id="vue-panier">
+                <h2>Mon panier</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Qté</th>
+                            <th>Prix</th>
+                            <th>Sous-total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="panier-lignes"></tbody>
+                </table>
+                <div class="total-box">
+                    <div>Total estimé</div>
+                    <div class="montant" id="panier-total">0 FCFA</div>
+                </div>
+                <div style="margin-top:1rem; display:flex; gap:0.5rem;">
+                    <button onclick="validerCommande()">Valider ma commande</button>
+                    <button class="secondary" onclick="fermerPanier()">Continuer mes achats</button>
+                </div>
+            </div>
+
+            <!-- Vue confirmation -->
+            <!-- Vue confirmation -->
+<div class="confirmation" id="vue-confirmation">
+    <div style="font-size:3rem;">✅</div>
+    <h2>Commande envoyée !</h2>
+    <p>Votre commande a bien été reçue.</p>
+
+    <div style="margin:1.5rem auto; background:#f5f5f5; border-radius:12px; padding:1.5rem; max-width:250px;">
+        <div style="font-size:0.85rem; color:var(--gray-text); margin-bottom:0.3rem;">Votre numéro de commande</div>
+        <div style="font-size:3rem; font-weight:700; letter-spacing:0.1em;" id="numero-commande">—</div>
+        <div style="font-size:0.8rem; color:var(--gray-text); margin-top:0.5rem;">Présentez ce numéro à la caisse</div>
+    </div>
+
+    <p>Le gérant va préparer votre commande. Merci !</p>
+    <button style="margin-top:1.5rem;" onclick="nouvelleCommande()">Nouvelle commande</button>
+</div>
+
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/catalogue.js') }}"></script>
+</body>
+</html>

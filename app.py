@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request, render_template
 from database import get_connection, init_db
 from flask import Flask, jsonify, request, render_template, send_file
@@ -21,6 +22,12 @@ def vente_page():
 @app.route("/historique-page")
 def historique_page():
     return render_template("historique.html")
+@app.route("/catalogue")
+def catalogue_page():
+    return render_template("catalogue.html")
+@app.route("/commandes-page")
+def commandes_page():
+    return render_template("commandes.html")
 # ---------------------------------------------------------
 # API : PRODUITS
 # ---------------------------------------------------------
@@ -131,16 +138,24 @@ def delete_produit(produit_id):
 @app.route("/api/ventes", methods=["POST"])
 def create_vente():
     """
-    Crée une vente à partir d'une liste de lignes :
+    Crée une commande à partir d'une liste de lignes :
     {
         "lignes": [
             { "produit_id": 1, "quantite": 2 },
             { "produit_id": 3, "quantite": 1 }
-        ]
+        ],
+        "statut": "en_attente"  (optionnel, défaut = "confirmee")
     }
+
+    - statut "en_attente" : commande client, stock NON déduit
+    - statut "confirmee"  : vente directe (comptoir), stock déduit immédiatement
     """
     data = request.get_json()
     lignes = data.get("lignes", [])
+    statut = data.get("statut", "confirmee")
+
+    if statut not in ("en_attente", "confirmee"):
+        return jsonify({"erreur": "Statut invalide"}), 400
 
     if not lignes:
         return jsonify({"erreur": "La vente doit contenir au moins une ligne"}), 400
@@ -177,13 +192,13 @@ def create_vente():
     # 2. Calculer le total
     total = sum(p["produit"]["prix_unitaire"] * p["quantite"] for p in produits_info)
 
-    # 3. Créer la vente
+    # 3. Créer la vente avec le statut demandé
     cursor = conn.execute(
-        "INSERT INTO ventes (total) VALUES (?)", (total,)
+        "INSERT INTO ventes (total, statut) VALUES (?, ?)", (total, statut)
     )
     vente_id = cursor.lastrowid
 
-    # 4. Créer les lignes de vente + déduire le stock
+    # 4. Créer les lignes de vente
     for item in produits_info:
         produit = item["produit"]
         quantite = item["quantite"]
@@ -196,22 +211,106 @@ def create_vente():
             (vente_id, produit["id"], produit["nom"], quantite, produit["prix_unitaire"], sous_total),
         )
 
-        conn.execute(
-            "UPDATE produits SET quantite_stock = quantite_stock - ? WHERE id = ?",
-            (quantite, produit["id"]),
-        )
+        # 5. Déduire le stock UNIQUEMENT si la vente est confirmée immédiatement
+        if statut == "confirmee":
+            conn.execute(
+                "UPDATE produits SET quantite_stock = quantite_stock - ? WHERE id = ?",
+                (quantite, produit["id"]),
+            )
 
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Vente enregistrée", "vente_id": vente_id, "total": total}), 201
+    return jsonify({"message": "Vente enregistrée", "vente_id": vente_id, "total": total, "statut": statut}), 201
+@app.route("/api/ventes/<int:vente_id>/confirmer", methods=["POST"])
+def confirmer_vente(vente_id):
+    """Confirme une commande en attente : déduit le stock et passe le statut à 'confirmee'."""
+    conn = get_connection()
 
+    vente = conn.execute(
+        "SELECT * FROM ventes WHERE id = ?", (vente_id,)
+    ).fetchone()
+
+    if vente is None:
+        conn.close()
+        return jsonify({"erreur": "Vente non trouvée"}), 404
+
+    if vente["statut"] == "confirmee":
+        conn.close()
+        return jsonify({"erreur": "Cette commande est déjà confirmée"}), 400
+
+    lignes = conn.execute(
+        "SELECT * FROM lignes_vente WHERE vente_id = ?", (vente_id,)
+    ).fetchall()
+
+    # Vérifier le stock disponible avant de confirmer
+    for ligne in lignes:
+        produit = conn.execute(
+            "SELECT * FROM produits WHERE id = ?", (ligne["produit_id"],)
+        ).fetchone()
+
+        if produit is None or produit["quantite_stock"] < ligne["quantite"]:
+            conn.close()
+            return jsonify({
+                "erreur": f"Stock insuffisant pour '{ligne['nom_produit']}' "
+                          f"pour confirmer cette commande"
+            }), 400
+
+    # Déduire le stock pour chaque ligne
+    for ligne in lignes:
+        conn.execute(
+            "UPDATE produits SET quantite_stock = quantite_stock - ? WHERE id = ?",
+            (ligne["quantite"], ligne["produit_id"]),
+        )
+
+    # Mettre à jour le statut
+    conn.execute(
+        "UPDATE ventes SET statut = 'confirmee' WHERE id = ?", (vente_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Commande confirmée, stock mis à jour"})
+
+@app.route("/api/ventes/<int:vente_id>/annuler", methods=["POST"])
+def annuler_vente(vente_id):
+    """Annule une commande en attente (la supprime)."""
+    conn = get_connection()
+
+    vente = conn.execute(
+        "SELECT * FROM ventes WHERE id = ?", (vente_id,)
+    ).fetchone()
+
+    if vente is None:
+        conn.close()
+        return jsonify({"erreur": "Vente non trouvée"}), 404
+
+    if vente["statut"] == "confirmee":
+        conn.close()
+        return jsonify({"erreur": "Impossible d'annuler une commande déjà confirmée"}), 400
+
+    conn.execute("DELETE FROM ventes WHERE id = ?", (vente_id,))
+    conn.execute("DELETE FROM lignes_vente WHERE vente_id = ?", (vente_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Commande annulée"})
 
 @app.route("/api/ventes", methods=["GET"])
 def get_ventes():
     conn = get_connection()
     ventes = conn.execute(
         "SELECT * FROM ventes ORDER BY date_vente DESC"
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(v) for v in ventes])
+
+@app.route("/api/ventes/en_attente", methods=["GET"])
+def get_ventes_en_attente():
+    conn = get_connection()
+    ventes = conn.execute(
+        "SELECT * FROM ventes WHERE statut = 'en_attente' ORDER BY date_vente ASC"
     ).fetchall()
     conn.close()
     return jsonify([dict(v) for v in ventes])
@@ -271,4 +370,4 @@ def get_vente(vente_id):
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)

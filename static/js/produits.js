@@ -35,7 +35,6 @@ function ouvrirFormulaire() {
     document.getElementById("prix_unitaire").value = "";
     document.getElementById("quantite_stock").value = "";
     document.getElementById("seuil_alerte").value = "5";
-
     document.getElementById("form-produit").style.display = "block";
 }
 
@@ -43,6 +42,7 @@ function ouvrirFormulaire() {
 function fermerFormulaire() {
     document.getElementById("form-produit").style.display = "none";
 }
+
 
 // Charge un produit existant dans le formulaire pour modification
 async function modifierProduit(id) {
@@ -58,6 +58,7 @@ async function modifierProduit(id) {
     document.getElementById("quantite_stock").value = produit.quantite_stock;
     document.getElementById("seuil_alerte").value = produit.seuil_alerte;
 
+   
     document.getElementById("form-produit").style.display = "block";
 }
 

@@ -35,7 +35,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS ventes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date_vente TEXT DEFAULT (datetime('now')),
-            total REAL NOT NULL DEFAULT 0
+            total REAL NOT NULL DEFAULT 0,
+            statut TEXT NOT NULL DEFAULT 'confirmee'
         )
     """)
 

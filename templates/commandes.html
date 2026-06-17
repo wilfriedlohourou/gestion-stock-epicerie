@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Commandes{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1>Commandes en attente</h1>
+    <button onclick="chargerCommandes()"> Actualiser</button>
+</div>
+
+<div id="liste-commandes">
+    <!-- Rempli dynamiquement -->
+</div>
+
+<script src="{{ url_for('static', filename='js/commandes.js') }}"></script>
+{% endblock %}
