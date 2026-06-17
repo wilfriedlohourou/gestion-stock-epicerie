@@ -32,6 +32,21 @@ async function chargerCatalogue() {
         grid.appendChild(card);
     });
 }
+//recherche et filtre les produits affichés en fonction du texte saisi dans la barre de recherche
+function filtrerProduits() {
+    const texte = document.getElementById("recherche").value.toLowerCase();
+    const cards = document.querySelectorAll(".produit-card");
+
+    cards.forEach((card) => {
+        const nom = card.querySelector("h3").textContent.toLowerCase();
+        const categorie = card.querySelector("small") ? card.querySelector("small").textContent.toLowerCase() : "";
+        if (nom.includes(texte) || categorie.includes(texte)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
 
 // Ajoute un produit au panier
 function ajouterAuPanier(produitId) {

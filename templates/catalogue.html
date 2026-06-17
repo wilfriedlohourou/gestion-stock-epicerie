@@ -111,7 +111,9 @@
     <main class="container">
         <h1>Nos produits</h1>
         <p>Sélectionnez vos produits et validez votre panier.</p>
-
+        <div class="form-group" style="margin-top:1.5rem;">
+            <input type="text" id="recherche" placeholder=" Rechercher un produit..." oninput="filtrerProduits()">
+        </div>
         <div class="catalogue-grid" id="catalogue-grid">
             <!-- Produits chargés dynamiquement -->
         </div>
